@@ -1,0 +1,59 @@
+#/etc/nginx/default-params
+
+charset utf-8;
+client_max_body_size 10M;
+
+# allow only GET, HEAD, POST
+if ($request_method !~ ^(GET|HEAD|POST|OPTIONS)$ ) {
+    return 444;
+}
+
+# www redirect
+if ($host ~* ^([a-z0-9\-]+\.(com|net|org))$) {
+    set $host_with_www www.$1;
+    rewrite ^(.*)$ http://$host_with_www$1 permanent;
+}
+
+# expire static assets at 90d
+location ~* \.(js|json|txt|css|png|jpg|jpeg|gif|ico|eot|otf|ttf|woff|pdf|swf|flv|html|html|xml|xsl|svg)$ {
+    expires 90d;
+    fastcgi_hide_header Set-Cookie;
+    break;
+}
+
+# block access to specific files
+location ~* \.(tpl|conf|phtml|ini|sql|sh|inc|htaccess|gitignore)$ {
+    deny all;
+    return 404;
+}
+
+# BLOCKS ACCESS TO . FILES (.svn, .htaccess, ...)
+location ~ /\. {
+    deny  all;
+    return 404;
+}
+
+# Allow JSON, XML and TXT files pass through our CMS engine
+location ~* \.(json|xml|txt) {
+        fastcgi_hide_header Set-Cookie;
+        try_files $uri /index.php?$args;
+        expires 30d;
+        break;
+}
+
+# Deny direct access to core and admin/app
+location ~ /(core|admin/app) {
+    deny all;
+    return 404;
+}
+
+location ~ \.ttf {
+    add_header Content-Type application/x-font-ttf;
+}
+location ~ \.woff {
+    add_header Content-Type application/x-font-woff;
+}
+location ~ \.eot {
+    add_header Content-Type application/vnd.ms-fontobject;
+}
+
