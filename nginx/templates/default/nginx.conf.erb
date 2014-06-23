@@ -43,6 +43,25 @@ http {
 
   server_names_hash_bucket_size <%= node[:nginx][:server_names_hash_bucket_size] %>;
 
+  ### ALL the followinf "add_header" dirrectives were added to current config for the security reason   
+  ## X-Frame-Options ##iframe DENY
+  add_header X-Frame-Options DENY;
+
+  ## X-Content-Type-Options
+  add_header X-Content-Type-Options nosniff;
+
+  ##X-XSS-Protection
+  add_header X-XSS-Protection "1; mode=block;";
+
+  ##X-Content-Security-Policy
+  add_header X-Content-Security-Policy "allow 'self';";
+  add_header X-WebKit-CSP "allow 'self';";
+
+  #######
+  add_header  Cache-Control public;
+  add_header  Last-Modified "";
+  add_header  ETag "";
+
   include <%= node[:nginx][:dir] %>/conf.d/*.conf;
   include <%= node[:nginx][:dir] %>/sites-enabled/*;
 }
