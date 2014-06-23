@@ -82,5 +82,13 @@ server {
   if ($request_uri ~* ^.*\.git.*$) {
      return 404;
   }
+  
+  # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
+ location ~ \.php$ {
+ include /etc/nginx/fastcgi_params;
+ fastcgi_pass 127.0.0.1:9000;
+ fastcgi_index index.php;
+ fastcgi_param SCRIPT_FILENAME <%= @application[:absolute_document_root] %>$fastcgi_script_name;
+}
 }
 <% end %>
